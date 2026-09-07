@@ -47,12 +47,90 @@ If `/admin/users` bounces you to the dashboard, your account isn't an admin.
 `proxy.ts` redirects silently. Note that admin status is baked into the session
 cookie at login, so changing it in Redis requires a fresh login to take effect.
 
-## Before pushing
+## Contributing
+
+Work on a branch, never directly on `main`.
+
+```bash
+git switch main && git pull
+git switch -c fix/short-description
+```
+
+Prefix with `fix/`, `feat/`, or `docs/` so the branch list stays readable.
+
+Before committing:
 
 ```bash
 npm run lint
 npm run build        # type-checks; catches server/client component errors
+git status           # confirm .env.local is NOT listed
 ```
 
-Push to a branch for a Vercel preview deploy. Merging to `main` deploys to
-production.
+`npm run build` matters more than it looks — it catches server/client component
+mistakes that `npm run dev` tolerates.
+
+```bash
+git add <files>
+git commit -m "Describe what changed and why"
+git push -u origin fix/short-description
+```
+
+Pushing a branch gets you a Vercel preview deployment at its own URL. Test there
+before opening the PR. Note that previews use Vercel's preview environment
+variables, which point at the production database — don't create test data.
+
+### If the push is denied
+
+```
+remote: Permission to hackerfabiitb/inventory.git denied
+```
+
+You don't have write access to the org repo. Ask an org admin to add you as a
+collaborator — that's the better fix if you'll be working on this regularly.
+
+To work immediately without waiting, fork:
+
+```bash
+gh repo set-default hackerfabiitb/inventory
+gh repo fork --remote --remote-name fork
+git push -u fork fix/short-description
+```
+
+`origin` still points at the org repo, so `git pull` keeps working normally;
+only your pushes go to the fork.
+
+### Opening the PR
+
+```bash
+gh pr create --fill
+```
+
+Or use the banner GitHub shows after a push. Open a PR even for small changes —
+it gives you a diff to review and a record of why the change happened.
+
+Once approved:
+
+```bash
+gh pr merge --squash --delete-branch
+git switch main && git pull
+```
+
+`--squash` collapses the branch into one commit on `main`. Use `--merge` instead
+if the individual commits are worth keeping.
+
+Merging to `main` triggers a production deploy on Vercel automatically. Watch it
+finish — a broken build blocks everyone's next change.
+
+### Keeping a branch current
+
+If `main` has moved on while you were working:
+
+```bash
+git switch main && git pull
+git switch fix/short-description
+git merge main
+```
+
+Resolve conflicts, re-run `npm run build`, and push. Don't rebase a branch you've
+already pushed — it rewrites commit hashes and breaks things for anyone else who
+has it.
