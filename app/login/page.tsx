@@ -54,11 +54,16 @@ export default function LoginPage() {
           <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-4">
             <Package2 className="w-7 h-7 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-800">SRA Inventory</h1>
+          <h1 className="text-2xl font-bold text-slate-800">
+            Hackerfab IITB Inventory
+          </h1>
           <p className="text-slate-500 text-sm mt-1">Sign in to your account</p>
         </div>
 
-        <form onSubmit={handleLogin} className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-sm">
+        <form
+          onSubmit={handleLogin}
+          className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4 shadow-sm"
+        >
           <div className="space-y-1.5">
             <Label>User ID</Label>
             <Input
@@ -85,7 +90,11 @@ export default function LoginPage() {
                 onClick={() => setShowPw(!showPw)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
-                {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPw ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
               </button>
             </div>
           </div>
@@ -101,7 +110,10 @@ export default function LoginPage() {
         {needsSetup && (
           <p className="text-center text-sm text-slate-500 mt-4">
             First time?{" "}
-            <Link href="/setup" className="text-indigo-600 hover:underline font-medium">
+            <Link
+              href="/setup"
+              className="text-indigo-600 hover:underline font-medium"
+            >
               Set up admin account
             </Link>
           </p>

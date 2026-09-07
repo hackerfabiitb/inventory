@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# nix
+.direnv/
+result
+result-*
+
+# direnv config is safe to commit; un-ignore it from the .env* rule above
+!.envrc
+
+# local dev services
+.redis/
+.npm-global/

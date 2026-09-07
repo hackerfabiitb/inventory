@@ -1,4 +1,6 @@
-# SRA Inventory System - Guide
+# Hackerfab IITB Inventory System - Guide
+
+> [!info] Forked from SRA Inventory System
 
 ## Table of Contents
 
@@ -21,7 +23,7 @@
 
 ## Overview
 
-The SRA Inventory System tracks all club components and tools. It records what is in stock, where each item is stored, who added it, and who has taken it out. Every action is logged so there is always a clear history of what happened and who was responsible.
+The Hackerfab IITB Inventory System tracks all club components and tools. It records what is in stock, where each item is stored, who added it, and who has taken it out. Every action is logged so there is always a clear history of what happened and who was responsible.
 
 The system is accessible from any device through the browser. No login is required.
 
@@ -59,7 +61,7 @@ Manage the component category list. Default categories are locked. Custom catego
 
 ### History
 
-A full audit log of every action ever performed. Shows who did what, when, and by how much the stock changed. 
+A full audit log of every action ever performed. Shows who did what, when, and by how much the stock changed.
 
 ---
 
@@ -243,11 +245,13 @@ Do not put a component back in a random box. If the component's assigned box is 
 **Labelling standard:**
 
 Every physical box must have a label showing:
+
 - Box ID (e.g. BOX-003)
 - Box name
 - Location
 
 Every component bag or container must have a label showing:
+
 - Part number (e.g. SENS/2026/007)
 - Component name
 
@@ -266,3 +270,4 @@ During any room-cleaning session:
 Following this protocol means that cleaning sessions, which have historically caused the most inventory confusion, do not result in lost or mixed components.
 
 ---
+
