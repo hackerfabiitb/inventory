@@ -156,7 +156,7 @@ export default function Navbar({
             <div className="w-7 h-7 bg-indigo-600 rounded-md flex items-center justify-center">
               <Package2 className="w-4 h-4 text-white" />
             </div>
-            <span className="text-base">SRA Inventory</span>
+            <span className="text-base">Hackerfab IITB Inventory</span>
           </Link>
           <div className="flex items-center gap-2">
             {session && (
