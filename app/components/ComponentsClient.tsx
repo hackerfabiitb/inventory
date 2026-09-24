@@ -103,6 +103,7 @@ export default function ComponentsClient({ initialComponents }: { initialCompone
                 <tr className="border-b border-slate-100 bg-slate-50/80">
                   <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-4 py-3">Part No.</th>
                   <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-4 py-3">Name</th>
+                  <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-4 py-3 w-full">Description</th>
                   <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-4 py-3">Category</th>
                   <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-4 py-3">Box</th>
                   <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wide px-4 py-3">Qty</th>
@@ -116,9 +117,13 @@ export default function ComponentsClient({ initialComponents }: { initialCompone
                       <span className="font-mono text-xs text-slate-500">{c.id}</span>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="font-medium text-slate-800 text-sm">{c.name}</div>
-                      {c.description && (
-                        <div className="text-xs text-slate-400 truncate max-w-[200px]">{c.description}</div>
+                      <div className="font-medium text-slate-800 text-sm min-w-[10rem]">{c.name}</div>
+                    </td>
+                    <td className="px-4 py-3">
+                      {c.description ? (
+                        <div className="text-sm text-slate-500 line-clamp-2" title={String(c.description)}>{c.description}</div>
+                      ) : (
+                        <span className="text-slate-300 text-sm">—</span>
                       )}
                     </td>
                     <td className="px-4 py-3">

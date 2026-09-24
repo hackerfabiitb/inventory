@@ -90,12 +90,24 @@ one-character password.
 No throttling on `/api/auth/login`. A Redis counter keyed on userId with a TTL
 is a few lines; `redis.incr` is already used for ID counters.
 
-### Archive instead of hard delete — M
+### Trash UI for deleted components — M
 
-Deleting a component removes it and orphans its transaction history, which
-undermines the audit log. Add an `archived` flag, hide archived items from the
-default views, and keep the history intact. Then deletion can stay open to
-everyone without risk.
+Deleting a component now moves it to the trash instead of destroying it: the
+full hash (plus `deletedAt` / `deletedBy`) is copied to `trash:component:<id>`
+and the id is added to the `trash:components` zset, scored by deletion time.
+Its `tx:comp:<id>` history is left untouched. There is no UI for it yet, so
+deleted components can only be seen through the Upstash Data Browser.
+
+Still to do:
+
+- A Trash page listing `trash:components`, newest first, with who deleted what
+  and when.
+- **Restore**: move the hash back to `component:<id>`, re-add it to
+  `components:all` and `components:cat:<cat>`, drop `deletedAt`/`deletedBy`,
+  and write a transaction for it (every stock change needs one).
+- Optionally **Delete forever**, admin-only, for genuine mistakes.
+- Components deleted before the trash existed are gone for good; only their
+  `DELETED` transactions remain.
 
 ---
 
@@ -214,11 +226,11 @@ Options, cheapest first: shorten the cookie expiry; add a `sessionVersion` field
 to the user record that's included in the cookie and checked on each request; or
 keep a Redis denylist of revoked session IDs.
 
-### Insider risk is the realistic one — see Archive task
+### Insider risk is the realistic one — see Trash task
 
 For a club tool, the likely failure isn't an attacker — it's a member deleting a
 component and its history by accident, or an ex-member with a still-valid cookie.
-The archive-instead-of-hard-delete task above matters more than it first looks.
+The trash task above matters more than it first looks.
 
 ---
 

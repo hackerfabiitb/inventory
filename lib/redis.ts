@@ -25,6 +25,9 @@ export const keys = {
   component: (id: string) => `component:${id}`,
   componentsAll: () => `components:all`,
   componentsByCategory: (cat: string) => `components:cat:${cat}`,
+  // Deleted components: full hash kept here, id in a zset scored by deletion time
+  trashedComponent: (id: string) => `trash:component:${id}`,
+  trashComponents: () => `trash:components`,
   counter: (cat: string, year: number) => `counter:${cat}:${year}`,
   box: (id: string) => `box:${id}`,
   boxesAll: () => `boxes:all`,

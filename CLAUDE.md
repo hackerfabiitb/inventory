@@ -47,6 +47,7 @@ Four entities, all Redis hashes, each with a `:all` set for listing and a
 counter key for ID generation. See `keys` in `lib/redis.ts` for exact strings.
 
 - `component:<id>` / `components:all` / `components:cat:<cat>`
+- `trash:component:<id>` / `trash:components` — deleted components (no UI yet)
 - `box:<id>` / `boxes:all`
 - `tx:<id>` / `tx:all` / `tx:comp:<id>`
 - `user:<userId>` / `users:all`

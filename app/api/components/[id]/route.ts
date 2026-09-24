@@ -108,6 +108,9 @@ export async function DELETE(req: NextRequest, { params }: Params) {
     const pipeline = redis.pipeline();
 
     if (hardDelete) {
+      // Move to trash rather than destroying it, so it can be restored later
+      pipeline.hset(keys.trashedComponent(decodedId), { ...component, deletedAt: now, deletedBy: performedBy });
+      pipeline.zadd(keys.trashComponents(), { score: Date.now(), member: decodedId });
       pipeline.del(keys.component(decodedId));
       pipeline.srem(keys.componentsAll(), decodedId);
       pipeline.srem(keys.componentsByCategory(component.category), decodedId);
@@ -126,7 +129,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       quantityAfter: 0,
       performedBy,
       notes: hardDelete
-        ? "Component permanently removed from database"
+        ? "Component deleted (moved to trash)"
         : `All stock (${component.quantity}) removed`,
       timestamp: now,
     };

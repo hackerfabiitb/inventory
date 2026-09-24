@@ -91,6 +91,37 @@ export default function NewComponentClient() {
     setSuggestions([]);
   };
 
+  // Jump to the Create New tab with the typed name filled in
+  const startNewComponent = (componentName: string) => {
+    setName(componentName);
+    setSearchQ("");
+    setSelectedComponent(null);
+    setMode("create");
+  };
+
+  // Enter: pick the exact match, or start a new component if nothing matches at all
+  const handleComponentEnter = async () => {
+    const q = searchQ.trim();
+    if (!q || selectedComponent) return;
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&type=components`);
+      const results: Component[] = res.ok ? await res.json() : [];
+      const exact = results.find(
+        (c) => String(c.name).toLowerCase() === q.toLowerCase() || c.id.toLowerCase() === q.toLowerCase()
+      );
+      if (exact) handleSelectComponent(exact);
+      else if (results.length === 0) startNewComponent(q);
+      else setSuggestions(results);
+    } catch {
+      toast.error("Component search failed");
+    }
+  };
+
+  const componentQuery = searchQ.trim();
+  const hasExactComponent = suggestions.some(
+    (c) => String(c.name).toLowerCase() === componentQuery.toLowerCase() || c.id.toLowerCase() === componentQuery.toLowerCase()
+  );
+
   const handleSelectBox = (b: Box) => {
     setSelectedBox(b);
     setNewBox(null);
@@ -250,7 +281,7 @@ export default function NewComponentClient() {
           className={cn("flex-1 py-2 rounded-md text-sm font-medium transition-colors",
             mode === "search" ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700")}
         >
-          Add to Existing
+          Add Existing
         </button>
         <button
           onClick={() => setMode("create")}
@@ -272,8 +303,9 @@ export default function NewComponentClient() {
                 placeholder="Type component name or part number..."
                 value={searchQ}
                 onChange={(e) => { setSearchQ(e.target.value); setSelectedComponent(null); }}
+                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleComponentEnter(); } }}
               />
-              {suggestions.length > 0 && (
+              {componentQuery && !selectedComponent && (suggestions.length > 0 || !hasExactComponent) && (
                 <div className="absolute top-full mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg z-10 overflow-hidden">
                   {suggestions.map((c) => (
                     <button key={c.id} className="w-full text-left px-4 py-2.5 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
@@ -285,6 +317,13 @@ export default function NewComponentClient() {
                       <div className="text-xs text-slate-400 mt-0.5">Qty: {c.quantity}{c.boxName && ` · ${c.boxName}`}</div>
                     </button>
                   ))}
+                  {!hasExactComponent && (
+                    <button className="w-full text-left px-4 py-2.5 hover:bg-indigo-50 transition-colors flex items-center gap-2 text-sm text-indigo-600 font-medium"
+                      onClick={() => startNewComponent(componentQuery)}>
+                      <Plus className="w-4 h-4" />
+                      Create new component &ldquo;{componentQuery}&rdquo;
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -303,6 +342,10 @@ export default function NewComponentClient() {
             <div className="space-y-1.5 pt-1">
               <Label>Quantity to Add <span className="text-red-500">*</span></Label>
               <Input type="number" min="1" value={qty} onChange={(e) => setQty(e.target.value)} />
+            </div>
+            <div className="space-y-1.5 pt-1">
+              <Label>Notes</Label>
+              <Input placeholder="Optional, e.g. restocked from supplier" value={notes} onChange={(e) => setNotes(e.target.value)} />
             </div>
           </div>
         ) : (
@@ -352,7 +395,7 @@ export default function NewComponentClient() {
 
             <div className="space-y-1.5">
               <Label>Description</Label>
-              <Textarea placeholder="Optional notes" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
+              <Textarea placeholder="Optional: specs, model number, project" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
             </div>
 
             <div className="space-y-1.5">
@@ -423,11 +466,6 @@ export default function NewComponentClient() {
             </div>
           </>
         )}
-
-        <div className="space-y-1.5">
-          <Label>Notes</Label>
-          <Input placeholder="Optional notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
-        </div>
 
         <button
           onClick={mode === "search" ? handleAddToExisting : handleCreate}

@@ -47,7 +47,7 @@ export default function ComponentDetail({
   const [stockNotes, setStockNotes] = useState("");
 
   // Delete dialog
-  const [deleteDialog, setDeleteDialog] = useState<"soft" | "hard" | null>(null);
+  const [clearDialog, setClearDialog] = useState(false);
 
   const handleStock = async () => {
     setLoading(true);
@@ -76,21 +76,24 @@ export default function ComponentDetail({
     }
   };
 
-  const handleDelete = async () => {
+  // hard: move the component to trash (no confirmation — it's recoverable).
+  // soft: clear all stock, confirmed via the dialog.
+  const handleDelete = async (hard: boolean) => {
     setLoading(true);
     try {
       const res = await fetch(`/api/components/${encodeURIComponent(component.id)}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ hardDelete: deleteDialog === "hard" }),
+        body: JSON.stringify({ hardDelete: hard }),
       });
       if (!res.ok) throw new Error((await res.json()).error);
-      toast.success(deleteDialog === "hard" ? "Component deleted" : "Stock cleared");
-      if (deleteDialog === "hard") {
+      toast.success(hard ? "Component deleted" : "Stock cleared");
+      if (hard) {
         router.push("/components");
+        router.refresh();
       } else {
         setComponent({ ...component, quantity: 0 });
-        setDeleteDialog(null);
+        setClearDialog(false);
         router.refresh();
       }
     } catch (e: unknown) {
@@ -179,7 +182,7 @@ export default function ComponentDetail({
           Stock Out
         </button>
         <button
-          onClick={() => setDeleteDialog("soft")}
+          onClick={() => setClearDialog(true)}
           disabled={Number(component.quantity) === 0}
           className="flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
@@ -187,7 +190,8 @@ export default function ComponentDetail({
           Clear Stock
         </button>
         <button
-          onClick={() => setDeleteDialog("hard")}
+          onClick={() => handleDelete(true)}
+          disabled={loading}
           className="flex items-center justify-center gap-2 bg-white border border-red-200 text-red-600 py-2.5 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <Trash2 className="w-4 h-4" />
@@ -265,30 +269,26 @@ export default function ComponentDetail({
         </DialogContent>
       </Dialog>
 
-      {/* Delete dialog */}
-      <Dialog open={!!deleteDialog} onOpenChange={() => setDeleteDialog(null)}>
+      {/* Clear stock dialog */}
+      <Dialog open={clearDialog} onOpenChange={setClearDialog}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-red-600">
-              {deleteDialog === "hard" ? "Delete Component" : "Clear All Stock"}
-            </DialogTitle>
+            <DialogTitle className="text-red-600">Clear All Stock</DialogTitle>
             <DialogDescription>
-              {deleteDialog === "hard"
-                ? "This permanently removes the component from the database. This cannot be undone."
-                : `This will set the stock of "${component.name}" to 0 and log it. The component remains in the database.`}
+              {`This will set the stock of "${component.name}" to 0 and log it. The component remains in the database.`}
             </DialogDescription>
           </DialogHeader>
           <div className="pt-2">
             <div className="flex gap-2">
-              <button onClick={() => setDeleteDialog(null)} className="flex-1 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm hover:bg-slate-50 transition-colors">
+              <button onClick={() => setClearDialog(false)} className="flex-1 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm hover:bg-slate-50 transition-colors">
                 Cancel
               </button>
               <button
-                onClick={handleDelete}
+                onClick={() => handleDelete(false)}
                 disabled={loading}
                 className="flex-1 py-2 rounded-lg bg-red-600 text-white text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-60"
               >
-                {loading ? "..." : deleteDialog === "hard" ? "Delete Forever" : "Clear Stock"}
+                {loading ? "..." : "Clear Stock"}
               </button>
             </div>
           </div>

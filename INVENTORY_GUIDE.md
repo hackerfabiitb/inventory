@@ -94,7 +94,7 @@ Use this when a component is being entered into the system for the first time.
    - **Component Name** - be specific (e.g. "DHT11 Temperature Sensor", not just "Sensor")
    - **Category** - select the appropriate category; if none fits, use the **New Category** button
    - **Description** - optional but recommended. Include specs, model number, or project context
-   - **Initial Stock Quantity** - how many units are being put in the box right now. Leave it at 0 to register the component before any stock arrives; add stock later with **Add to Existing** or **Check In**
+   - **Initial Stock Quantity** - how many units are being put in the box right now. Leave it at 0 to register the component before any stock arrives; add stock later with **Add Existing** or **Check In**
    - **Storage Box** - start typing the box name to search and select the box where this component will be kept. If the box does not exist yet, keep typing the new name and press **Enter** (or click **Create new box**), then fill in its **Location**. The box is created together with the component
 4. Click **Create Component**
 
@@ -109,9 +109,9 @@ Write this part number on the physical component bag or container.
 Use this when more units of an already-registered component arrive (e.g. a reorder comes in).
 
 1. Go to **Components** and click **Add Component**
-2. Stay on the **Add to Existing** tab (selected by default)
+2. Stay on the **Add Existing** tab (selected by default)
 3. Type the component name in the search box. Matching components appear as you type
-4. Click the correct component to select it
+4. Click the correct component to select it. If it isn't registered yet, press **Enter** (or click **Create new component**) to jump to **Create New** with the name filled in
 5. Fill in:
    - **Quantity to Add** - number of new units being added. Put them in the component's existing box, which is shown after you select it
    - **Notes** - optional, e.g. "Restocked from XYZ supplier"
