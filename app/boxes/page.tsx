@@ -61,31 +61,19 @@ export default async function BoxesPage() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {boxes.map((box) => {
-            const isEklavya = box.boxType === "EKLAVYA";
             return (
               <Link
                 key={box.id}
                 href={`/boxes/${box.id}`}
-                className={`bg-white rounded-xl border p-4 hover:shadow-sm transition-all group ${
-                  isEklavya
-                    ? "border-amber-200 hover:border-amber-300"
-                    : "border-slate-200 hover:border-indigo-200"
-                }`}
+                className="bg-white rounded-xl border border-slate-200 hover:border-indigo-200 p-4 hover:shadow-sm transition-all group"
               >
                 <div className="flex items-start justify-between mb-3">
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${isEklavya ? "bg-amber-50" : "bg-purple-50"}`}>
-                    <BoxIcon className={`w-5 h-5 ${isEklavya ? "text-amber-600" : "text-purple-600"}`} />
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-purple-50">
+                    <BoxIcon className="w-5 h-5 text-purple-600" />
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    {isEklavya && (
-                      <span className="text-[10px] font-bold uppercase tracking-wide text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
-                        Eklavya
-                      </span>
-                    )}
-                    <span className="font-mono text-xs text-slate-400 bg-slate-50 px-2 py-0.5 rounded">{box.id}</span>
-                  </div>
+                  <span className="font-mono text-xs text-slate-400 bg-slate-50 px-2 py-0.5 rounded">{box.id}</span>
                 </div>
-                <div className={`font-semibold text-slate-800 transition-colors ${isEklavya ? "group-hover:text-amber-700" : "group-hover:text-indigo-700"}`}>
+                <div className="font-semibold text-slate-800 transition-colors group-hover:text-indigo-700">
                   {box.name}
                 </div>
                 <div className="flex items-center gap-1 text-xs text-slate-400 mt-1">

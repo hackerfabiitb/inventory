@@ -60,15 +60,12 @@ export interface Component extends Record<string, unknown> {
   updatedAt: string;
 }
 
-export type BoxType = "GENERAL" | "EKLAVYA";
-
 export interface Box extends Record<string, unknown> {
   id: string;
   name: string;
   location: string;
   createdBy: string;
   createdAt: string;
-  boxType: string; // "GENERAL" | "EKLAVYA"
   componentCount?: number;
 }
 

@@ -69,17 +69,16 @@ A full audit log of every action ever performed. Shows who did what, when, and b
 
 ### Creating a Box
 
-A box must exist before a component can be assigned to it.
+You can create a box while adding a component (see below), or on its own:
 
 1. Go to **Boxes** in the navigation
 2. Click **New Box**
 3. Fill in:
    - **Box Name** - a clear, descriptive name (e.g. "Sensors Box A", "Tools Shelf 2")
    - **Location** - where the box physically is (e.g. "Cabinet 3, Shelf 2, Room 101")
-   - **Your Name** - who is creating this box
 4. Click **Create Box**
 
-The box is assigned an ID automatically (BOX-001, BOX-002, etc.).
+The box is assigned an ID automatically (BOX-001, BOX-002, etc.). Your account is recorded as the creator.
 
 Label the physical box with its ID and name immediately after creating it.
 
@@ -95,12 +94,11 @@ Use this when a component is being entered into the system for the first time.
    - **Component Name** - be specific (e.g. "DHT11 Temperature Sensor", not just "Sensor")
    - **Category** - select the appropriate category; if none fits, use the **New Category** button
    - **Description** - optional but recommended. Include specs, model number, or project context
-   - **Initial Stock Quantity** - how many units are being entered right now
-   - **Storage Box** - start typing the box name to search. Select the box where this component will be kept. If the box does not exist yet, create it first
-   - **Your Name** - who is adding this to the inventory
+   - **Initial Stock Quantity** - how many units are being put in the box right now. Leave it at 0 to register the component before any stock arrives; add stock later with **Add to Existing** or **Check In**
+   - **Storage Box** - start typing the box name to search and select the box where this component will be kept. If the box does not exist yet, keep typing the new name and press **Enter** (or click **Create new box**), then fill in its **Location**. The box is created together with the component
 4. Click **Create Component**
 
-A part number is assigned automatically in the format `CATEGORY/YEAR/NUMBER` (e.g. `SENS/2026/003`).
+A part number is assigned automatically in the format `CATEGORY/YEAR/NUMBER` (e.g. `SENS/2026/003`). Your account and the time are recorded automatically.
 
 Write this part number on the physical component bag or container.
 
@@ -115,9 +113,7 @@ Use this when more units of an already-registered component arrive (e.g. a reord
 3. Type the component name in the search box. Matching components appear as you type
 4. Click the correct component to select it
 5. Fill in:
-   - **Quantity to Add** - number of new units being added
-   - **Storage Box** - where the new stock is being placed (may be the same or different box)
-   - **Your Name**
+   - **Quantity to Add** - number of new units being added. Put them in the component's existing box, which is shown after you select it
    - **Notes** - optional, e.g. "Restocked from XYZ supplier"
 6. Click **Add to Stock**
 
@@ -135,11 +131,10 @@ Use this whenever someone takes a component from the room for use in a project o
 4. Click the **Out** button on that component's card
 5. An inline form appears. Fill in:
    - **Quantity** - how many units are being taken
-   - **Your Name** - who is taking it (mandatory)
    - **Notes** - optional but recommended. E.g. "For Line Follower project", "Taking home to test"
 6. Click **Confirm Check Out**
 
-The stock count decreases immediately. The transaction is logged with your name, the quantity, and the timestamp.
+The stock count decreases immediately. The transaction is logged under your account with the quantity and the timestamp.
 
 If the stock shows 0, the Out button is disabled. Contact the person who last checked it out if you need it.
 
@@ -154,7 +149,6 @@ Use this when someone brings a component back, whether from home or from a proje
 3. Click the **In** button on the card
 4. Fill in:
    - **Quantity** - how many units are being returned
-   - **Your Name**
    - **Notes** - optional, e.g. "Returned after Line Follower demo"
 5. Click **Confirm Check In**
 
@@ -221,7 +215,7 @@ The club has faced recurring issues with inventory:
 
 1. Go to Check In/Out on the website
 2. Find the component and click Out
-3. Enter your name and the quantity
+3. Enter the quantity
 4. Then physically take the component
 
 This applies even if you are taking one resistor. The log exists so that when something goes missing, there is a clear record of the last person who touched it.
@@ -230,7 +224,7 @@ This applies even if you are taking one resistor. The log exists so that when so
 
 1. Go to Check In/Out
 2. Find the component and click In
-3. Enter your name and the quantity
+3. Enter the quantity
 4. Place the component back in its correct box
 
 Do not put a component back in a random box. If the component's assigned box is unclear, check the component's detail page which shows the box it was last assigned to.

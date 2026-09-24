@@ -45,10 +45,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { name, location, boxType } = await req.json() as {
+    const { name, location } = await req.json() as {
       name: string;
       location: string;
-      boxType?: string;
     };
     const createdBy = session.name;
 
@@ -66,7 +65,6 @@ export async function POST(req: NextRequest) {
       location,
       createdBy,
       createdAt: now,
-      boxType: boxType === "EKLAVYA" ? "EKLAVYA" : "GENERAL",
     };
     const pipeline = redis.pipeline();
     pipeline.hset(keys.box(id), box);

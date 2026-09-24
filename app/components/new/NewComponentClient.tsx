@@ -50,6 +50,8 @@ export default function NewComponentClient() {
   const [boxSuggestions, setBoxSuggestions] = useState<Box[]>([]);
   const [selectedBox, setSelectedBox] = useState<Box | null>(null);
   const [showBoxDropdown, setShowBoxDropdown] = useState(false);
+  // A box typed in that doesn't exist yet; created on submit
+  const [newBox, setNewBox] = useState<{ name: string; location: string } | null>(null);
 
   // Create form
   const [name, setName] = useState("");
@@ -87,18 +89,41 @@ export default function NewComponentClient() {
     setSelectedComponent(c);
     setSearchQ(c.name);
     setSuggestions([]);
-    if (c.boxId) {
-      setBoxSearch(c.boxName ?? "");
-      setSelectedBox({ id: c.boxId, name: c.boxName ?? "", location: "", createdBy: "", createdAt: "", boxType: "GENERAL" });
-    }
   };
 
   const handleSelectBox = (b: Box) => {
     setSelectedBox(b);
+    setNewBox(null);
     setBoxSearch(`${b.name} (${b.id})`);
     setBoxSuggestions([]);
     setShowBoxDropdown(false);
   };
+
+  const startNewBox = (boxName: string) => {
+    setSelectedBox(null);
+    setNewBox({ name: boxName, location: "" });
+    setBoxSearch(boxName);
+    setShowBoxDropdown(false);
+  };
+
+  // Enter: pick the exact match, or start a new box if nothing matches at all
+  const handleBoxEnter = async () => {
+    const q = boxSearch.trim();
+    if (!q || selectedBox || newBox) return;
+    try {
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&type=boxes`);
+      const results: Box[] = res.ok ? await res.json() : [];
+      const exact = results.find((b) => String(b.name).toLowerCase() === q.toLowerCase());
+      if (exact) handleSelectBox(exact);
+      else if (results.length === 0) startNewBox(q);
+      else { setBoxSuggestions(results); setShowBoxDropdown(true); }
+    } catch {
+      toast.error("Box search failed");
+    }
+  };
+
+  const boxQuery = boxSearch.trim();
+  const hasExactBox = boxSuggestions.some((b) => String(b.name).toLowerCase() === boxQuery.toLowerCase());
 
   const handleCreateCategory = async () => {
     if (!newCatCode.trim() || !newCatLabel.trim()) {
@@ -159,8 +184,26 @@ export default function NewComponentClient() {
       toast.error("Name and category are required");
       return;
     }
+    if (newBox && !newBox.location.trim()) {
+      toast.error(`Enter a location for the new box "${newBox.name}"`);
+      return;
+    }
     setLoading(true);
     try {
+      let box = selectedBox;
+      if (newBox) {
+        const boxRes = await fetch("/api/boxes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: newBox.name, location: newBox.location.trim() }),
+        });
+        if (!boxRes.ok) throw new Error((await boxRes.json()).error);
+        box = await boxRes.json();
+        // Keep the created box selected so a retry doesn't create it twice
+        handleSelectBox(box!);
+        toast.success(`Box ${box!.id} created`);
+      }
+
       const res = await fetch("/api/components", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -172,8 +215,8 @@ export default function NewComponentClient() {
           description: description.trim(),
           quantity: Number(initialStock),
           initialStock: Number(initialStock),
-          boxId: selectedBox?.id ?? "",
-          boxName: selectedBox?.name ?? "",
+          boxId: box?.id ?? "",
+          boxName: box?.name ?? "",
         }),
       });
       if (!res.ok) throw new Error((await res.json()).error);
@@ -250,6 +293,9 @@ export default function NewComponentClient() {
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-indigo-800">{selectedComponent.name}</div>
                   <div className="text-xs text-indigo-500 font-mono">{selectedComponent.id} · Current stock: {selectedComponent.quantity}</div>
+                  {selectedComponent.boxName && (
+                    <div className="text-xs text-indigo-500">Box: {selectedComponent.boxName}</div>
+                  )}
                 </div>
               </div>
             )}
@@ -311,47 +357,70 @@ export default function NewComponentClient() {
             <div className="space-y-1.5">
               <Label>Initial Stock Quantity</Label>
               <Input type="number" min="0" value={initialStock} onChange={(e) => setInitialStock(e.target.value)} />
+              <p className="text-xs text-slate-400">How many you&apos;re putting in the box now. Leave at 0 to list it with no stock yet.</p>
+            </div>
+
+            {/* Box search — pick an existing box or type a new name */}
+            <div className="space-y-1.5">
+              <Label>Storage Box</Label>
+              <div className="relative">
+                <Input
+                  placeholder="Search boxes, or type a new box name..."
+                  value={boxSearch}
+                  onChange={(e) => { setBoxSearch(e.target.value); setSelectedBox(null); setNewBox(null); setShowBoxDropdown(true); }}
+                  onFocus={() => setShowBoxDropdown(true)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleBoxEnter(); } }}
+                />
+                {showBoxDropdown && boxQuery && !selectedBox && !newBox && (boxSuggestions.length > 0 || !hasExactBox) && (
+                  <div className="absolute top-full mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg z-10 overflow-hidden">
+                    {boxSuggestions.map((b) => (
+                      <button key={b.id} className="w-full text-left px-4 py-2.5 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
+                        onClick={() => handleSelectBox(b)}>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-slate-700">{b.name}</span>
+                          <span className="text-xs text-slate-400 font-mono">{b.id}</span>
+                        </div>
+                        <div className="text-xs text-slate-400 mt-0.5">{b.location}</div>
+                      </button>
+                    ))}
+                    {!hasExactBox && (
+                      <button className="w-full text-left px-4 py-2.5 hover:bg-indigo-50 transition-colors flex items-center gap-2 text-sm text-indigo-600 font-medium"
+                        onClick={() => startNewBox(boxQuery)}>
+                        <Plus className="w-4 h-4" />
+                        Create new box &ldquo;{boxQuery}&rdquo;
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+              {selectedBox?.id && (
+                <div className="text-xs text-slate-500 flex items-center gap-1">
+                  <span className="font-mono">{selectedBox.id}</span>
+                  <span>·</span>
+                  <span>{selectedBox.location}</span>
+                </div>
+              )}
+              {newBox && (
+                <div className="p-3 bg-indigo-50 rounded-lg space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-indigo-700">New box: {newBox.name}</span>
+                    <button onClick={() => { setNewBox(null); setBoxSearch(""); }} className="text-indigo-400 hover:text-indigo-600" title="Cancel new box">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <Label className="text-xs">Location <span className="text-red-500">*</span></Label>
+                  <Input
+                    className="bg-white"
+                    placeholder="e.g. Shelf 3, Lab Cabinet B"
+                    value={newBox.location}
+                    onChange={(e) => setNewBox({ ...newBox, location: e.target.value })}
+                    autoFocus
+                  />
+                </div>
+              )}
             </div>
           </>
         )}
-
-        {/* Box search — shared */}
-        <div className="space-y-1.5">
-          <Label>Storage Box</Label>
-          <div className="relative">
-            <Input
-              placeholder="Search or type box name..."
-              value={boxSearch}
-              onChange={(e) => { setBoxSearch(e.target.value); setSelectedBox(null); setShowBoxDropdown(true); }}
-              onFocus={() => setShowBoxDropdown(true)}
-            />
-            {showBoxDropdown && boxSuggestions.length > 0 && (
-              <div className="absolute top-full mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-lg z-10 overflow-hidden">
-                {boxSuggestions.map((b) => (
-                  <button key={b.id} className="w-full text-left px-4 py-2.5 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
-                    onClick={() => handleSelectBox(b)}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-slate-700">{b.name}</span>
-                      <span className="text-xs text-slate-400 font-mono">{b.id}</span>
-                    </div>
-                    <div className="text-xs text-slate-400 mt-0.5">{b.location}</div>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          {selectedBox?.id && (
-            <div className="text-xs text-slate-500 flex items-center gap-1">
-              <span className="font-mono">{selectedBox.id}</span>
-              <span>·</span>
-              <span>{selectedBox.location}</span>
-            </div>
-          )}
-          <p className="text-xs text-slate-400">
-            No box?{" "}
-            <Link href="/boxes/new" className="text-indigo-600 hover:underline">Create one first</Link>
-          </p>
-        </div>
 
         <div className="space-y-1.5">
           <Label>Notes</Label>
