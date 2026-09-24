@@ -114,7 +114,7 @@ export default function Navbar({
                 <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
                   <div className="text-right">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-sm font-medium text-slate-700">
+                      <span className="text-sm font-medium text-slate-700 whitespace-nowrap">
                         {session.name}
                       </span>
                       {session.isAdmin && (
