@@ -301,6 +301,7 @@ export default function NewComponentClient() {
               <Input
                 className="pl-9"
                 placeholder="Type component name or part number..."
+                autoFocus
                 value={searchQ}
                 onChange={(e) => { setSearchQ(e.target.value); setSelectedComponent(null); }}
                 onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleComponentEnter(); } }}

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Component, getCategoryLabel, getCategoryColor } from "@/lib/types";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Plus, Search, Package2, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -9,6 +10,7 @@ import { cn } from "@/lib/utils";
 const ALL = "ALL";
 
 export default function ComponentsClient({ initialComponents }: { initialComponents: Component[] }) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [selectedCat, setSelectedCat] = useState<string>(ALL);
 
@@ -107,21 +109,25 @@ export default function ComponentsClient({ initialComponents }: { initialCompone
                   <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-4 py-3">Category</th>
                   <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-4 py-3">Box</th>
                   <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wide px-4 py-3">Qty</th>
-                  <th className="px-4 py-3"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filtered.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-50 transition-colors">
+                  <tr
+                    key={c.id}
+                    onClick={() => router.push(`/components/${encodeURIComponent(c.id)}`)}
+                    className="hover:bg-slate-50 transition-colors cursor-pointer"
+                  >
                     <td className="px-4 py-3">
                       <span className="font-mono text-xs text-slate-500">{c.id}</span>
                     </td>
                     <td className="px-4 py-3">
                       <div className="font-medium text-slate-800 text-sm min-w-[10rem]">{c.name}</div>
                     </td>
-                    <td className="px-4 py-3">
+                    {/* max-w-0 + w-full header lets the column fill leftover width while truncate keeps it to one line */}
+                    <td className="px-4 py-3 max-w-0">
                       {c.description ? (
-                        <div className="text-sm text-slate-500 line-clamp-2" title={String(c.description)}>{c.description}</div>
+                        <div className="text-sm text-slate-500 truncate" title={String(c.description)}>{c.description}</div>
                       ) : (
                         <span className="text-slate-300 text-sm">—</span>
                       )}
@@ -133,9 +139,9 @@ export default function ComponentsClient({ initialComponents }: { initialCompone
                     </td>
                     <td className="px-4 py-3">
                       {c.boxName ? (
-                        <div>
-                          <div className="text-sm text-slate-700">{c.boxName}</div>
-                          <div className="text-xs text-slate-400 font-mono">{c.boxId}</div>
+                        <div className="whitespace-nowrap">
+                          <span className="text-sm text-slate-700">{c.boxName}</span>
+                          <span className="text-xs text-slate-400 font-mono ml-1.5">{c.boxId}</span>
                         </div>
                       ) : (
                         <span className="text-slate-300 text-sm">—</span>
@@ -149,11 +155,6 @@ export default function ComponentsClient({ initialComponents }: { initialCompone
                       }`}>
                         {c.quantity}
                       </span>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <Link href={`/components/${encodeURIComponent(c.id)}`} className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
-                        Manage
-                      </Link>
                     </td>
                   </tr>
                 ))}

@@ -7,6 +7,7 @@ import { ArrowLeft, Plus, Minus, Trash2, Package2, MapPin, Clock, User } from "l
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
 import {
   Dialog,
@@ -48,6 +49,29 @@ export default function ComponentDetail({
 
   // Delete dialog
   const [clearDialog, setClearDialog] = useState(false);
+
+  // Description is edited in place and saved when the textbox loses focus.
+  // String(): Upstash JSON-parses hash values, so e.g. "123" comes back as a number.
+  const [description, setDescription] = useState(String(initial.description ?? ""));
+
+  const saveDescription = async () => {
+    const next = description.trim();
+    if (next === String(component.description ?? "").trim()) return;
+    try {
+      const res = await fetch(`/api/components/${encodeURIComponent(component.id)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "UPDATE_DESCRIPTION", description: next }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error);
+      const updated: Component = await res.json();
+      setComponent(updated);
+      toast.success("Description saved");
+      router.refresh();
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Failed to save description");
+    }
+  };
 
   const handleStock = async () => {
     setLoading(true);
@@ -134,9 +158,18 @@ export default function ComponentDetail({
 
       {/* Info card */}
       <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-3">
-        {component.description && (
-          <p className="text-sm text-slate-600">{component.description}</p>
-        )}
+        <div className="space-y-1">
+          <Label htmlFor="description" className="text-xs text-slate-500">Description</Label>
+          <Textarea
+            id="description"
+            placeholder="Add a description: specs, model number, project..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            onBlur={saveDescription}
+            rows={2}
+            className="text-sm"
+          />
+        </div>
         <div className="grid grid-cols-2 gap-4 text-sm">
           {component.boxName && (
             <div className="flex items-start gap-2">

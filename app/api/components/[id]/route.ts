@@ -29,12 +29,13 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const { id } = await params;
     const decodedId = decodeURIComponent(id);
     const body = await req.json();
-    const { action, quantity, notes, boxId, boxName } = body as {
-      action: "STOCK_IN" | "STOCK_OUT" | "UPDATE_BOX";
+    const { action, quantity, notes, boxId, boxName, description } = body as {
+      action: "STOCK_IN" | "STOCK_OUT" | "UPDATE_BOX" | "UPDATE_DESCRIPTION";
       quantity?: number;
       notes?: string;
       boxId?: string;
       boxName?: string;
+      description?: string;
     };
     const performedBy = session.name;
 
@@ -76,6 +77,13 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         boxName: boxName ?? "",
         updatedAt: now,
       });
+    } else if (action === "UPDATE_DESCRIPTION") {
+      pipeline.hset(keys.component(decodedId), {
+        description: (description ?? "").trim(),
+        updatedAt: now,
+      });
+    } else {
+      return NextResponse.json({ error: "Unknown action" }, { status: 400 });
     }
 
     await pipeline.exec();
