@@ -33,6 +33,23 @@ const allNav = [
 
 const mobileNav = allNav.filter((n) => n.short !== null);
 
+const COMMIT_SHA = process.env.NEXT_PUBLIC_COMMIT_SHA ?? "";
+
+function CommitLink({ className }: { className?: string }) {
+  if (!COMMIT_SHA) return null;
+  return (
+    <a
+      href={`https://github.com/hackerfabiitb/inventory/commit/${COMMIT_SHA}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={`Built from commit ${COMMIT_SHA}`}
+      className={cn("font-mono text-[10px] text-slate-400 hover:text-indigo-600 transition-colors", className)}
+    >
+      {COMMIT_SHA.slice(0, 7)}
+    </a>
+  );
+}
+
 export default function Navbar({
   session,
 }: {
@@ -64,6 +81,7 @@ export default function Navbar({
                 </div>
                 <span>Hackerfab IITB Inventory</span>
               </Link>
+              <CommitLink className="-ml-3 shrink-0" />
               <nav className="flex items-center gap-0.5">
                 {allNav.map(({ href, label, icon: Icon }) => (
                   <Link
@@ -142,6 +160,7 @@ export default function Navbar({
             </div>
             <span className="text-base">Hackerfab IITB Inventory</span>
           </Link>
+          <CommitLink className="ml-1.5 mr-auto" />
           <div className="flex items-center gap-2">
             {session && (
               <div className="flex items-center gap-1.5">
