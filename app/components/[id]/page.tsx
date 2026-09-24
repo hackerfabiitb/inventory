@@ -7,10 +7,11 @@ import ComponentDetail from "./ComponentDetail";
 type Props = { params: Promise<{ id: string }> };
 
 async function getData(id: string) {
-  const component = await redis.hgetall<Component>(keys.component(id));
+  const [component, txIds] = await Promise.all([
+    redis.hgetall<Component>(keys.component(id)),
+    redis.zrange(keys.transactionsByComponent(id), 0, -1, { rev: true }) as Promise<string[]>,
+  ]);
   if (!component) return null;
-
-  const txIds = (await redis.zrange(keys.transactionsByComponent(id), 0, -1, { rev: true })) as string[];
   const pipeline = redis.pipeline();
   txIds.forEach((tid) => pipeline.hgetall(keys.transaction(tid)));
   const results = await pipeline.exec();

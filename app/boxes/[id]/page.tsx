@@ -9,10 +9,12 @@ import { format } from "date-fns";
 type Props = { params: Promise<{ id: string }> };
 
 async function getData(id: string) {
-  const box = await redis.hgetall<Box>(keys.box(id));
+  const [box, componentIds] = await Promise.all([
+    redis.hgetall<Box>(keys.box(id)),
+    redis.smembers(keys.componentsAll()),
+  ]);
   if (!box) return null;
 
-  const componentIds = await redis.smembers(keys.componentsAll());
   let contents: Component[] = [];
   if (componentIds.length) {
     const pipeline = redis.pipeline();
