@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { redis, keys } from "@/lib/redis";
 import { Component, Transaction } from "@/lib/types";
+import { getSession } from "@/lib/session";
 
 export async function GET() {
   try {
@@ -28,11 +29,16 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  }
+
   try {
     const body = await req.json();
     const {
       name, category, categoryLabel, categoryColor,
-      description, quantity, boxId, boxName, addedBy, initialStock,
+      description, quantity, boxId, boxName, initialStock,
     } = body as {
       name: string;
       category: string;
@@ -42,11 +48,11 @@ export async function POST(req: NextRequest) {
       quantity: number;
       boxId?: string;
       boxName?: string;
-      addedBy: string;
       initialStock?: number;
     };
+    const addedBy = session.name;
 
-    if (!name || !category || !addedBy) {
+    if (!name || !category) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 

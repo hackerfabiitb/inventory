@@ -44,15 +44,12 @@ export default function ComponentDetail({
   // Stock in/out dialog state
   const [stockDialog, setStockDialog] = useState<"in" | "out" | null>(null);
   const [stockQty, setStockQty] = useState("1");
-  const [stockBy, setStockBy] = useState("");
   const [stockNotes, setStockNotes] = useState("");
 
   // Delete dialog
   const [deleteDialog, setDeleteDialog] = useState<"soft" | "hard" | null>(null);
-  const [deleteBy, setDeleteBy] = useState("");
 
   const handleStock = async () => {
-    if (!stockBy.trim()) { toast.error("Please enter your name"); return; }
     setLoading(true);
     try {
       const res = await fetch(`/api/components/${encodeURIComponent(component.id)}`, {
@@ -61,7 +58,6 @@ export default function ComponentDetail({
         body: JSON.stringify({
           action: stockDialog === "in" ? "STOCK_IN" : "STOCK_OUT",
           quantity: Number(stockQty),
-          performedBy: stockBy.trim(),
           notes: stockNotes.trim() || undefined,
         }),
       });
@@ -71,7 +67,6 @@ export default function ComponentDetail({
       toast.success(`${stockDialog === "in" ? "Added" : "Removed"} ${stockQty} units`);
       setStockDialog(null);
       setStockQty("1");
-      setStockBy("");
       setStockNotes("");
       router.refresh();
     } catch (e: unknown) {
@@ -82,16 +77,12 @@ export default function ComponentDetail({
   };
 
   const handleDelete = async () => {
-    if (!deleteBy.trim()) { toast.error("Please enter your name"); return; }
     setLoading(true);
     try {
       const res = await fetch(`/api/components/${encodeURIComponent(component.id)}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          performedBy: deleteBy.trim(),
-          hardDelete: deleteDialog === "hard",
-        }),
+        body: JSON.stringify({ hardDelete: deleteDialog === "hard" }),
       });
       if (!res.ok) throw new Error((await res.json()).error);
       toast.success(deleteDialog === "hard" ? "Component deleted" : "Stock cleared");
@@ -255,10 +246,6 @@ export default function ComponentDetail({
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Your Name <span className="text-red-500">*</span></Label>
-              <Input placeholder="Who is doing this?" value={stockBy} onChange={(e) => setStockBy(e.target.value)} />
-            </div>
-            <div className="space-y-1.5">
               <Label>Notes</Label>
               <Input placeholder="Optional reason" value={stockNotes} onChange={(e) => setStockNotes(e.target.value)} />
             </div>
@@ -291,11 +278,7 @@ export default function ComponentDetail({
                 : `This will set the stock of "${component.name}" to 0 and log it. The component remains in the database.`}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 pt-2">
-            <div className="space-y-1.5">
-              <Label>Your Name <span className="text-red-500">*</span></Label>
-              <Input placeholder="Who is doing this?" value={deleteBy} onChange={(e) => setDeleteBy(e.target.value)} />
-            </div>
+          <div className="pt-2">
             <div className="flex gap-2">
               <button onClick={() => setDeleteDialog(null)} className="flex-1 py-2 rounded-lg border border-slate-200 text-slate-600 text-sm hover:bg-slate-50 transition-colors">
                 Cancel

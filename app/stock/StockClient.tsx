@@ -11,7 +11,6 @@ type ActionState = {
   componentId: string;
   mode: "in" | "out";
   qty: string;
-  name: string;
   notes: string;
 };
 
@@ -24,11 +23,7 @@ function useDebounce<T>(value: T, delay: number): T {
   return d;
 }
 
-export default function StockClient({
-  userName,
-}: {
-  userName: string;
-}) {
+export default function StockClient() {
   const [query, setQuery] = useState("");
   const debounced = useDebounce(query, 200);
   const [results, setResults] = useState<Component[]>([]);
@@ -67,7 +62,7 @@ export default function StockClient({
   }, [debounced, allComponents]);
 
   const openAction = (c: Component, mode: "in" | "out") => {
-    setAction({ componentId: c.id, mode, qty: "1", name: userName, notes: "" });
+    setAction({ componentId: c.id, mode, qty: "1", notes: "" });
     setLastDone(null);
   };
 
@@ -75,7 +70,6 @@ export default function StockClient({
 
   const handleSubmit = async () => {
     if (!action) return;
-    if (!action.name.trim()) { toast.error("Please enter your name"); return; }
     const qty = Number(action.qty);
     if (!qty || qty < 1) { toast.error("Enter a valid quantity"); return; }
 
@@ -94,7 +88,6 @@ export default function StockClient({
         body: JSON.stringify({
           action: action.mode === "in" ? "STOCK_IN" : "STOCK_OUT",
           quantity: qty,
-          performedBy: action.name.trim(),
           notes: action.notes.trim() || undefined,
         }),
       });
@@ -250,29 +243,18 @@ export default function StockClient({
                   <p className="text-sm font-medium text-slate-700">
                     {action.mode === "in" ? "Returning to stock" : "Taking from stock"}
                   </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <Label className="text-xs">Quantity <span className="text-red-500">*</span></Label>
-                      <Input
-                        type="number"
-                        min="1"
-                        max={action.mode === "out" ? c.quantity : undefined}
-                        value={action.qty}
-                        onChange={(e) => setAction({ ...action, qty: e.target.value })}
-                        className="bg-white"
-                        autoFocus
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Your Name <span className="text-red-500">*</span></Label>
-                      <Input
-                        placeholder="Who is doing this?"
-                        value={action.name}
-                        onChange={(e) => setAction({ ...action, name: e.target.value })}
-                        className="bg-white"
-                        onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                      />
-                    </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Quantity <span className="text-red-500">*</span></Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      max={action.mode === "out" ? c.quantity : undefined}
+                      value={action.qty}
+                      onChange={(e) => setAction({ ...action, qty: e.target.value })}
+                      className="bg-white"
+                      autoFocus
+                      onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                    />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs">Notes (optional)</Label>

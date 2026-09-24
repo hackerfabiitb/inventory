@@ -42,7 +42,6 @@ export default function NewComponentClient() {
 
   // Shared fields
   const [qty, setQty] = useState("1");
-  const [performedBy, setPerformedBy] = useState("");
   const [notes, setNotes] = useState("");
 
   // Box search
@@ -130,8 +129,8 @@ export default function NewComponentClient() {
   };
 
   const handleAddToExisting = async () => {
-    if (!selectedComponent || !performedBy.trim()) {
-      toast.error("Select a component and enter your name");
+    if (!selectedComponent) {
+      toast.error("Select a component");
       return;
     }
     setLoading(true);
@@ -142,7 +141,6 @@ export default function NewComponentClient() {
         body: JSON.stringify({
           action: "STOCK_IN",
           quantity: Number(qty),
-          performedBy: performedBy.trim(),
           notes: notes.trim() || undefined,
         }),
       });
@@ -157,8 +155,8 @@ export default function NewComponentClient() {
   };
 
   const handleCreate = async () => {
-    if (!name.trim() || !category || !performedBy.trim()) {
-      toast.error("Name, category and your name are required");
+    if (!name.trim() || !category) {
+      toast.error("Name and category are required");
       return;
     }
     setLoading(true);
@@ -176,7 +174,6 @@ export default function NewComponentClient() {
           initialStock: Number(initialStock),
           boxId: selectedBox?.id ?? "",
           boxName: selectedBox?.name ?? "",
-          addedBy: performedBy.trim(),
         }),
       });
       if (!res.ok) throw new Error((await res.json()).error);
@@ -354,11 +351,6 @@ export default function NewComponentClient() {
             No box?{" "}
             <Link href="/boxes/new" className="text-indigo-600 hover:underline">Create one first</Link>
           </p>
-        </div>
-
-        <div className="space-y-1.5">
-          <Label>Your Name <span className="text-red-500">*</span></Label>
-          <Input placeholder="Who is adding this?" value={performedBy} onChange={(e) => setPerformedBy(e.target.value)} />
         </div>
 
         <div className="space-y-1.5">

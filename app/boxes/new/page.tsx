@@ -13,11 +13,10 @@ export default function NewBoxPage() {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
-  const [createdBy, setCreatedBy] = useState("");
   const [boxType, setBoxType] = useState<"GENERAL" | "EKLAVYA">("GENERAL");
 
   const handleCreate = async () => {
-    if (!name.trim() || !location.trim() || !createdBy.trim()) {
+    if (!name.trim() || !location.trim()) {
       toast.error("All fields are required");
       return;
     }
@@ -26,7 +25,7 @@ export default function NewBoxPage() {
       const res = await fetch("/api/boxes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), location: location.trim(), createdBy: createdBy.trim(), boxType }),
+        body: JSON.stringify({ name: name.trim(), location: location.trim(), boxType }),
       });
       if (!res.ok) throw new Error((await res.json()).error);
       const box = await res.json();
@@ -100,15 +99,6 @@ export default function NewBoxPage() {
             placeholder="e.g. Shelf 3, Room 201 / Lab Cabinet B"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label>Your Name <span className="text-red-500">*</span></Label>
-          <Input
-            placeholder="Who is creating this box?"
-            value={createdBy}
-            onChange={(e) => setCreatedBy(e.target.value)}
           />
         </div>
 

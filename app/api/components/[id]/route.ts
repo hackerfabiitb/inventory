@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { redis, keys } from "@/lib/redis";
 import { Component, Transaction } from "@/lib/types";
+import { getSession } from "@/lib/session";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -19,18 +20,23 @@ export async function GET(_req: NextRequest, { params }: Params) {
 }
 
 export async function PATCH(req: NextRequest, { params }: Params) {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
     const decodedId = decodeURIComponent(id);
     const body = await req.json();
-    const { action, quantity, performedBy, notes, boxId, boxName } = body as {
+    const { action, quantity, notes, boxId, boxName } = body as {
       action: "STOCK_IN" | "STOCK_OUT" | "UPDATE_BOX";
       quantity?: number;
-      performedBy: string;
       notes?: string;
       boxId?: string;
       boxName?: string;
     };
+    const performedBy = session.name;
 
     const component = await redis.hgetall<Component>(keys.component(decodedId));
     if (!component) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -39,8 +45,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const pipeline = redis.pipeline();
 
     if (action === "STOCK_IN" || action === "STOCK_OUT") {
-      if (!quantity || !performedBy) {
-        return NextResponse.json({ error: "Missing quantity or performer" }, { status: 400 });
+      if (!quantity) {
+        return NextResponse.json({ error: "Missing quantity" }, { status: 400 });
       }
       const delta = action === "STOCK_IN" ? quantity : -quantity;
       const newQty = Number(component.quantity) + delta;
@@ -82,13 +88,18 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 }
 
 export async function DELETE(req: NextRequest, { params }: Params) {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
     const decodedId = decodeURIComponent(id);
-    const { performedBy, hardDelete } = await req.json() as {
-      performedBy: string;
+    const { hardDelete } = await req.json() as {
       hardDelete: boolean;
     };
+    const performedBy = session.name;
 
     const component = await redis.hgetall<Component>(keys.component(decodedId));
     if (!component) return NextResponse.json({ error: "Not found" }, { status: 404 });

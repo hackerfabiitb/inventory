@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { redis, keys } from "@/lib/redis";
 import { Box, Component } from "@/lib/types";
+import { getSession } from "@/lib/session";
 
 export async function GET() {
   try {
@@ -38,15 +39,20 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  }
+
   try {
-    const { name, location, createdBy, boxType } = await req.json() as {
+    const { name, location, boxType } = await req.json() as {
       name: string;
       location: string;
-      createdBy: string;
       boxType?: string;
     };
+    const createdBy = session.name;
 
-    if (!name || !location || !createdBy) {
+    if (!name || !location) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
