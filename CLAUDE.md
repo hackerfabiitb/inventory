@@ -175,7 +175,8 @@ Roughly in order of how much pain they cause:
 
 ## Conventions
 
-- After every prompt, commit your changes with a suitable message.
+- After every prompt, commit your changes with a suitable message, then push
+  to `origin main`. Run `npm run build` first and don't push a failing build.
 
 - Multi-key writes go through `redis.pipeline()`.
 - API routes start with `export const dynamic = "force-dynamic"`.
