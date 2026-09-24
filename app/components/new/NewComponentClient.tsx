@@ -181,7 +181,8 @@ export default function NewComponentClient() {
 
   const handleCreate = async () => {
     if (!name.trim() || !category) {
-      toast.error("Name and category are required");
+      const missing = [!name.trim() && "Component Name", !category && "Category"].filter(Boolean);
+      toast.error(`Missing: ${missing.join(", ")}`);
       return;
     }
     if (newBox && !newBox.location.trim()) {
@@ -414,6 +415,7 @@ export default function NewComponentClient() {
                     placeholder="e.g. Shelf 3, Lab Cabinet B"
                     value={newBox.location}
                     onChange={(e) => setNewBox({ ...newBox, location: e.target.value })}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleCreate(); } }}
                     autoFocus
                   />
                 </div>
