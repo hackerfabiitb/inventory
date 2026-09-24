@@ -1,12 +1,9 @@
 import { SignJWT, jwtVerify } from "jose";
 
-export type UserYear = "SY" | "TY" | "LY";
-
 export interface SessionPayload {
   id: string;
   name: string;
   userId: string;
-  year: UserYear;
   isAdmin: boolean;
 }
 

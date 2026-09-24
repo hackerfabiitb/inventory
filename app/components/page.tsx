@@ -1,7 +1,6 @@
 export const dynamic = "force-dynamic";
 import { redis, keys } from "@/lib/redis";
 import { Component } from "@/lib/types";
-import { getSession } from "@/lib/session";
 import ComponentsClient from "./ComponentsClient";
 
 async function getComponents() {
@@ -16,7 +15,6 @@ async function getComponents() {
 }
 
 export default async function ComponentsPage() {
-  const [components, session] = await Promise.all([getComponents(), getSession()]);
-  const canWrite = session?.year === "TY" || session?.year === "LY";
-  return <ComponentsClient initialComponents={components} canWrite={canWrite} />;
+  const components = await getComponents();
+  return <ComponentsClient initialComponents={components} />;
 }

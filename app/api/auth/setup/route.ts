@@ -38,7 +38,6 @@ export async function POST(req: NextRequest) {
       name: name.trim(),
       userId: normalizedId,
       passwordHash,
-      year: "TY",
       isAdmin: "true",
       createdAt: now,
     };
@@ -52,7 +51,6 @@ export async function POST(req: NextRequest) {
       id: internalId,
       name: user.name,
       userId: normalizedId,
-      year: "TY",
       isAdmin: true,
     };
     await createSession(payload);

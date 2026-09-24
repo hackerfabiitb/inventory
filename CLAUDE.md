@@ -123,6 +123,11 @@ request and redirects.
 Rule 4 redirects silently, so a non-admin hitting `/admin/users` sees the
 dashboard and assumes the page doesn't exist. Worth surfacing an error.
 
+**Permissions are two-tier.** Every logged-in user can do everything with
+inventory: add, edit, check in/out, delete. `isAdmin` only gates user
+management (`/admin/*` and `/api/users`). There are no year levels or other
+roles — don't reintroduce per-user write gates without a club decision.
+
 **`isAdmin` lives in the signed cookie.** Changing it in Redis does nothing until
 the user logs out and back in. Remember this when debugging permissions.
 
@@ -158,7 +163,7 @@ component mistakes that `dev` tolerates. Run it before pushing.
 
 Roughly in order of how much pain they cause:
 
-- **No `PATCH /api/users/[id]`.** No way to reset a password, change a year, or
+- **No `PATCH /api/users/[id]`.** No way to reset a password, rename a user, or
   grant admin after creation. The only recourse is delete-and-recreate, which
   breaks audit-log references, or hand-editing Redis.
 - **No nav link to `/admin/users`.** Admins have to know the URL exists.
@@ -167,8 +172,6 @@ Roughly in order of how much pain they cause:
 - **Password length is validated client-side only.** Neither `/api/users` nor
   `/api/auth/setup` checks it server-side.
 - **No rate limiting on login.** A Redis counter with a TTL would be a few lines.
-- `/setup` hardcodes `year: "TY"` for the first user, unchangeable without the
-  PATCH route above.
 
 ## Conventions
 

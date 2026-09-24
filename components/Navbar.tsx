@@ -33,12 +33,6 @@ const allNav = [
 
 const mobileNav = allNav.filter((n) => n.short !== null);
 
-const YEAR_BADGE: Record<string, string> = {
-  SY: "bg-slate-100 text-slate-600",
-  TY: "bg-blue-100 text-blue-700",
-  LY: "bg-green-100 text-green-700",
-};
-
 export default function Navbar({
   session,
 }: {
@@ -112,25 +106,15 @@ export default function Navbar({
               </button>
               {session && (
                 <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
-                  <div className="text-right">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-sm font-medium text-slate-700 whitespace-nowrap">
-                        {session.name}
-                      </span>
-                      {session.isAdmin && (
-                        <span title="Admin">
-                          <ShieldCheck className="w-3.5 h-3.5 text-indigo-500" />
-                        </span>
-                      )}
-                    </div>
-                    <span
-                      className={cn(
-                        "text-[10px] font-semibold px-1.5 py-0.5 rounded",
-                        YEAR_BADGE[session.year] ?? YEAR_BADGE.SY,
-                      )}
-                    >
-                      {session.year}
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-medium text-slate-700 whitespace-nowrap">
+                      {session.name}
                     </span>
+                    {session.isAdmin && (
+                      <span title="Admin">
+                        <ShieldCheck className="w-3.5 h-3.5 text-indigo-500" />
+                      </span>
+                    )}
                   </div>
                   <button
                     onClick={handleLogout}
@@ -161,14 +145,6 @@ export default function Navbar({
           <div className="flex items-center gap-2">
             {session && (
               <div className="flex items-center gap-1.5">
-                <span
-                  className={cn(
-                    "text-[10px] font-semibold px-1.5 py-0.5 rounded",
-                    YEAR_BADGE[session.year] ?? YEAR_BADGE.SY,
-                  )}
-                >
-                  {session.year}
-                </span>
                 <span className="text-xs font-medium text-slate-600 max-w-[80px] truncate">
                   {session.name.split(" ")[0]}
                 </span>

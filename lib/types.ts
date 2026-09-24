@@ -72,14 +72,11 @@ export interface Box extends Record<string, unknown> {
   componentCount?: number;
 }
 
-export type UserYear = "SY" | "TY" | "LY";
-
 export interface User extends Record<string, unknown> {
   internalId: string;   // "USR-001"
   name: string;
   userId: string;       // login username
   passwordHash: string;
-  year: string;         // "SY" | "TY" | "LY"
   isAdmin: string;      // "true" | "false" (Redis hash values are strings)
   createdAt: string;
 }

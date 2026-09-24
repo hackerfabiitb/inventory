@@ -94,7 +94,7 @@ export default function SetupPage() {
             </div>
           </div>
           <div className="bg-indigo-50 rounded-lg px-3 py-2 text-xs text-indigo-700">
-            This creates the admin account (TY level + admin access). Add other users from the Admin panel after setup.
+            This creates the admin account. Add other users from the Admin panel after setup.
           </div>
           <button
             type="submit"

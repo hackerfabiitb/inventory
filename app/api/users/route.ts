@@ -25,7 +25,6 @@ export async function GET() {
       internalId: u!.internalId,
       name: u!.name,
       userId: u!.userId,
-      year: u!.year,
       isAdmin: u!.isAdmin,
       createdAt: u!.createdAt,
     }))
@@ -41,20 +40,15 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { name, userId, password, year, isAdmin } = (await req.json()) as {
+    const { name, userId, password, isAdmin } = (await req.json()) as {
       name: string;
       userId: string;
       password: string;
-      year: string;
       isAdmin?: boolean;
     };
 
-    if (!name?.trim() || !userId?.trim() || !password || !year) {
+    if (!name?.trim() || !userId?.trim() || !password) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-    }
-
-    if (!["SY", "TY", "LY"].includes(year)) {
-      return NextResponse.json({ error: "Invalid year" }, { status: 400 });
     }
 
     const normalizedId = userId.trim().toLowerCase();
@@ -74,7 +68,6 @@ export async function POST(req: NextRequest) {
       name: name.trim(),
       userId: normalizedId,
       passwordHash,
-      year,
       isAdmin: isAdmin ? "true" : "false",
       createdAt: now,
     };
@@ -85,7 +78,7 @@ export async function POST(req: NextRequest) {
     await pipeline.exec();
 
     return NextResponse.json(
-      { internalId, name: user.name, userId: normalizedId, year, isAdmin: user.isAdmin, createdAt: now },
+      { internalId, name: user.name, userId: normalizedId, isAdmin: user.isAdmin, createdAt: now },
       { status: 201 }
     );
   } catch (error) {

@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Component, getCategoryLabel, getCategoryColor } from "@/lib/types";
 import { toast } from "sonner";
-import { Search, MapPin, ArrowDownCircle, ArrowUpCircle, X, Package2, CheckCircle2, Lock } from "lucide-react";
+import { Search, MapPin, ArrowDownCircle, ArrowUpCircle, X, Package2, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -25,10 +25,8 @@ function useDebounce<T>(value: T, delay: number): T {
 }
 
 export default function StockClient({
-  canWrite,
   userName,
 }: {
-  canWrite: boolean;
   userName: string;
 }) {
   const [query, setQuery] = useState("");
@@ -125,17 +123,9 @@ export default function StockClient({
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Check In / Out</h1>
-          <p className="text-slate-500 text-sm mt-0.5">Search any component and record a transaction</p>
-        </div>
-        {!canWrite && (
-          <div className="flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg">
-            <Lock className="w-3.5 h-3.5" />
-            View only (SY)
-          </div>
-        )}
+      <div>
+        <h1 className="text-2xl font-bold text-slate-800">Check In / Out</h1>
+        <p className="text-slate-500 text-sm mt-0.5">Search any component and record a transaction</p>
       </div>
 
       <div className="relative">
@@ -223,13 +213,10 @@ export default function StockClient({
                   </div>
 
                   <button
-                    onClick={() => canWrite && (isActive && action?.mode === "in" ? closeAction() : openAction(c, "in"))}
-                    disabled={!canWrite}
+                    onClick={() => (isActive && action?.mode === "in" ? closeAction() : openAction(c, "in"))}
                     className={cn(
                       "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                      !canWrite
-                        ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                        : isActive && action?.mode === "in"
+                      isActive && action?.mode === "in"
                         ? "bg-blue-600 text-white"
                         : "bg-blue-50 text-blue-700 hover:bg-blue-100"
                     )}
@@ -238,11 +225,11 @@ export default function StockClient({
                     In
                   </button>
                   <button
-                    onClick={() => canWrite && (isActive && action?.mode === "out" ? closeAction() : openAction(c, "out"))}
-                    disabled={isOut || !canWrite}
+                    onClick={() => (isActive && action?.mode === "out" ? closeAction() : openAction(c, "out"))}
+                    disabled={isOut}
                     className={cn(
                       "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                      !canWrite || isOut
+                      isOut
                         ? "bg-slate-100 text-slate-400 cursor-not-allowed"
                         : isActive && action?.mode === "out"
                         ? "bg-amber-500 text-white"
@@ -255,7 +242,7 @@ export default function StockClient({
                 </div>
               </div>
 
-              {isActive && action && canWrite && (
+              {isActive && action && (
                 <div className={cn(
                   "border-t px-4 py-4 space-y-3",
                   action.mode === "in" ? "border-blue-100 bg-blue-50/40" : "border-amber-100 bg-amber-50/40"

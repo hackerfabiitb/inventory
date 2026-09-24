@@ -9,15 +9,8 @@ type UserRow = {
   internalId: string;
   name: string;
   userId: string;
-  year: string;
   isAdmin: string;
   createdAt: string;
-};
-
-const YEAR_COLORS: Record<string, string> = {
-  SY: "bg-slate-100 text-slate-600 border-slate-200",
-  TY: "bg-blue-100 text-blue-700 border-blue-200",
-  LY: "bg-green-100 text-green-700 border-green-200",
 };
 
 export default function AdminUsersPage() {
@@ -29,7 +22,6 @@ export default function AdminUsersPage() {
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
-  const [year, setYear] = useState("TY");
   const [isAdmin, setIsAdmin] = useState(false);
   const [creating, setCreating] = useState(false);
 
@@ -48,7 +40,7 @@ export default function AdminUsersPage() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !userId.trim() || !password || !year) {
+    if (!name.trim() || !userId.trim() || !password) {
       toast.error("All fields are required");
       return;
     }
@@ -61,12 +53,12 @@ export default function AdminUsersPage() {
       const res = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), userId: userId.trim(), password, year, isAdmin }),
+        body: JSON.stringify({ name: name.trim(), userId: userId.trim(), password, isAdmin }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       toast.success(`User ${data.userId} created`);
-      setName(""); setUserId(""); setPassword(""); setYear("TY"); setIsAdmin(false);
+      setName(""); setUserId(""); setPassword(""); setIsAdmin(false);
       fetchUsers();
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "Failed");
@@ -115,7 +107,6 @@ export default function AdminUsersPage() {
                     <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-4 py-3">ID</th>
                     <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-4 py-3">Name</th>
                     <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-4 py-3">User ID</th>
-                    <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide px-4 py-3">Year</th>
                     <th className="px-4 py-3"></th>
                   </tr>
                 </thead>
@@ -132,11 +123,6 @@ export default function AdminUsersPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3 font-mono text-sm text-slate-600">{u.userId}</td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${YEAR_COLORS[u.year] ?? YEAR_COLORS.SY}`}>
-                          {u.year}
-                        </span>
-                      </td>
                       <td className="px-4 py-3 text-right">
                         <button
                           onClick={() => handleDelete(u.userId, u.name)}
@@ -162,14 +148,9 @@ export default function AdminUsersPage() {
                     </div>
                     <div className="text-xs text-slate-400 font-mono mt-0.5">{u.userId} · {u.internalId}</div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${YEAR_COLORS[u.year] ?? YEAR_COLORS.SY}`}>
-                      {u.year}
-                    </span>
-                    <button onClick={() => handleDelete(u.userId, u.name)} className="text-slate-400 hover:text-red-600">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                  <button onClick={() => handleDelete(u.userId, u.name)} className="text-slate-400 hover:text-red-600">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               ))}
             </div>
@@ -212,25 +193,6 @@ export default function AdminUsersPage() {
                 <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                   {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Year <span className="text-red-500">*</span></Label>
-              <div className="flex gap-2">
-                {(["SY", "TY", "LY"] as const).map((y) => (
-                  <button
-                    key={y}
-                    type="button"
-                    onClick={() => setYear(y)}
-                    className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${
-                      year === y
-                        ? "border-indigo-400 bg-indigo-50 text-indigo-700"
-                        : "border-slate-200 text-slate-600 hover:bg-slate-50"
-                    }`}
-                  >
-                    {y}
-                  </button>
-                ))}
               </div>
             </div>
           </div>

@@ -42,35 +42,10 @@ export const toBool = (v: unknown): boolean => v === true || v === "true";
 Affects `app/api/auth/login/route.ts` (the one that actually gates access) and
 the GET in `app/api/users/route.ts`. Existing records don't need migrating.
 
-### Year gate blocks component creation — S
-
-`app/components/new/page.tsx` only lets `TY` and `LY` users reach the form:
-
-```ts
-const canWrite = session?.year === "TY" || session?.year === "LY";
-if (!canWrite) redirect("/components");
-```
-
-Club decision is that **everyone** should be able to add and check out
-components — inventory upkeep is shared, not one person's chore. Remove this
-check, then grep for the same pattern elsewhere:
-
-```bash
-grep -rn "canWrite\|year ===" app/
-```
-
-Fix every hit including any in API routes — the page guards are cosmetic, the
-routes are what actually enforce.
-
-Keep a restriction on **deletion** if anything: a delete orphans transaction
-history. Admin-only, or better, see the archive task below.
-
 ### Permission redirects are silent — S
 
-Two places redirect on a failed permission check with no message, so a blocked
-page looks identical to a broken link:
-
-- `proxy.ts` — non-admin hitting `/admin/*` lands on `/`
+`proxy.ts` redirects a non-admin hitting `/admin/*` to `/` with no message, so a
+blocked page looks identical to a broken link.
 - `app/components/new/page.tsx` — year gate (being removed above)
 
 Pass something like `?error=forbidden` and have the destination show a toast.
@@ -83,11 +58,11 @@ This has cost real debugging time more than once.
 ### `PATCH /api/users/[id]` — M
 
 There is currently **no way to update a user**. Can't reset a forgotten
-password, change someone's year, or grant admin after the fact. The only
+password, rename someone, or grant admin after the fact. The only
 recourse is delete-and-recreate — which breaks audit-log references — or
 hand-editing Redis through the Upstash dashboard.
 
-Handle `password` (re-hash with bcrypt), `year`, and `isAdmin`. Copy the admin
+Handle `password` (re-hash with bcrypt), `name`, and `isAdmin`. Copy the admin
 check and pipeline pattern from the existing routes in the same folder. Wire it
 into `app/admin/users/page.tsx` as an edit action per row.
 
@@ -273,10 +248,3 @@ category of setup confusion:
 ```ts
 url: process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL!,
 ```
-
-### Document the permission model — S
-
-Right now permissions are scattered inline checks (`isAdmin` in `proxy.ts` and
-the API routes, `year` in the component page) with no single description of who
-can do what. Once the year gate is settled, write the intended matrix into
-`CLAUDE.md`.
